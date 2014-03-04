@@ -19,20 +19,16 @@
                 public string SX_code { get; set; }
             }
        	    public List<Option_SX> Items { get; set; }
+            DataConn objConn=new DataConn();
            protected void Page_Load(object sender, EventArgs e)
-           {  
-            String constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-
+           { 
             string ejfl_id = Request["id"];   //获取小类穿过来的分类编码        
 			
 			
-			SqlDataAdapter da_flsx = new SqlDataAdapter("select distinct 属性编码,属性名称,flsx_id "
+			DataTable dt_flsx = objConn.GetDataTable("select distinct 属性编码,属性名称,flsx_id "
 			+"from 材料分类属性值表 where 是否启用=1 and 分类编码='"+ejfl_id+"' and flsx_id in(select flsx_id "
-			+"from 材料分类属性表 where 是否启用=1 and 分类编码='"+ejfl_id+"') order by 属性编码",conn);    //分类 属性
-			DataSet ds_flsx = new DataSet();
-			da_flsx.Fill(ds_flsx,"材料分类属性值表");
-			DataTable dt_flsx = ds_flsx.Tables[0];
+			+"from 材料分类属性表 where 是否启用=1 and 分类编码='"+ejfl_id+"') order by 属性编码");    //分类 属性
+
 			
 		
 			System.Web.Script.Serialization.JavaScriptSerializer serializer = new System.Web.Script.Serialization.JavaScriptSerializer();

@@ -90,13 +90,11 @@ function ShowMenu(obj,n){
   public List<FLObject> Items3 { get; set; }
 
   protected DataTable dt = new DataTable(); //取一级分类名称
+  DataConn objConn=new DataConn();
   protected void Page_Load(object sender, EventArgs e)
   {
   	string yh_id = Request["yh_id"];
-		string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-    SqlConnection conn = new SqlConnection(constr);
-    conn.Open();
-    
+		
     string yh_id = Request["yh_id"];
     yh_id="054C93797C32272E3C65FEAC1495C308"
   	string querySQL = 
@@ -107,10 +105,8 @@ function ShowMenu(obj,n){
      	 	 or a.分类编码=left(d.flbm,4)  
          or a.分类编码=left(d.flbm.2)" 
          
-    SqlDataAdapter da = new SqlDataAdapter(querySQL, conn);
-    DataSet ds = new DataSet();
-    da.Fill(ds, "材料分类表");           
-    dt = ds.Tables[0];
+          
+    dt = objConn.GetDataTable(querySQL);
 
     ////数据表DataTable转集合                  
     this.Items1 = new List<FLObject>();

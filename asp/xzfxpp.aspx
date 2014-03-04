@@ -17,17 +17,13 @@
         protected DataTable dt_ppxx = new DataTable();   //品牌字典
 		protected String gys_id;
         protected String yh_id;
+    DataConn objConn=new DataConn();
         protected void Page_Load(object sender, EventArgs e)
         {
             gys_id = Request["gys_id"].ToString();
             yh_id = Session["yh_id"].ToString();
-
-            String constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-            SqlDataAdapter da_ppxx = new SqlDataAdapter("select pp_id,品牌名称,等级,范围,分类名称,分类编码,fl_id,生产商,scs_id from 品牌字典 ", conn);
-            DataSet ds_ppxx = new DataSet();
-            da_ppxx.Fill(ds_ppxx, "品牌字典");            
-            dt_ppxx = ds_ppxx.Tables[0];   
+            dt_ppxx = objConn.GetDataTable("select pp_id,品牌名称,等级,范围,分类名称,分类编码,fl_id,生产商,scs_id from 品牌字典 ");
+            
          }
 
 </script>

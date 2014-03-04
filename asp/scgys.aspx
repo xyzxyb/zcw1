@@ -57,36 +57,30 @@
         {
             //Response.Write("QQ_id is " + QQ_id.Value + "<p>");
 
-            String constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-
+           DataConn conn= new DataConn();
             string yh_id="错误";
             
             try{
                 //查询是否该QQid已经登录过
                 string str_checkuserexist = "select count(*) from 用户表 where QQ_id = '"+QQ_id.Value+"'";
-                SqlCommand cmd_checkuserexist = new SqlCommand(str_checkuserexist, conn);
-       
-                conn.Open();
-                Object res_checkuserexist = cmd_checkuserexist.ExecuteScalar();
+                
+                Object res_checkuserexist =conn.DBLook(str_checkuserexist);
                 if (res_checkuserexist != null) 
                 {
                      int count = Convert.ToInt32(res_checkuserexist);
                      if (count ==0 )  //qq_id 不存在，需要增加用户表
                      {
-                           String str_insertuser = "INSERT into 用户表 (QQ_id) VALUES ('"+ QQ_id.Value+"')";
-                           SqlCommand cmd_insertuser = new SqlCommand(str_insertuser, conn);         
-                           cmd_insertuser.ExecuteNonQuery();
+                           string str_insertuser = "INSERT into 用户表 (QQ_id) VALUES ('"+ QQ_id.Value+"')";
+                            conn.ExecuteSQL(str_insertuser,false);
 
-                           String str_updateyhid = "update 用户表 set yh_id = (select myId from 用户表 where QQ_id = '"+QQ_id.Value+"') where QQ_id = '"+QQ_id.Value+"')";
-                           SqlCommand cmd_updateyhid = new SqlCommand(str_updateyhid, conn);         
-                           cmd_updateyhid.ExecuteNonQuery();
+                           string str_updateyhid = "update 用户表 set yh_id = (select myId from 用户表 where QQ_id = '"+QQ_id.Value+"') where QQ_id = '"+QQ_id.Value+"')";
+                         conn.ExecuteSQL(str_updateyhid,false);
                      }
 
                      //获得yh_id
-                     String str_getyhid = "select myId from 用户表 where QQ_id ='"+ QQ_id.Value+"'";
-                     SqlCommand cmd_getyhid = new SqlCommand(str_getyhid, conn);
-                     Object res_yhid = cmd_getyhid.ExecuteScalar();
+                     string str_getyhid = "select myId from 用户表 where QQ_id ='"+ QQ_id.Value+"'";
+                   
+                     Object res_yhid = conn.DBLook(str_getyhid);
                      if (res_yhid != null) 
                      {
                          yh_id = Convert.ToString(res_yhid);
@@ -97,24 +91,21 @@
                       //先判断“采购商关注供应商表”是否有该记录，如果没有，则插入
 
                       string str_checkexist = "select count(*) from 采购商关注供应商表 where yh_id = '"+yh_id+"' and gys_id ='"+gys_id+"'";
-                      SqlCommand cmd_checkexist = new SqlCommand(str_checkexist, conn);
-                      int res_checkexist = Convert.ToInt32(cmd_checkexist.ExecuteScalar());
+                   
+                      int res_checkexist = Convert.ToInt32(conn.DBLook(str_checkexist));
                       if (res_checkexist !=1 ) 
                       {
        
                       //
-                          String str_getcl = "select 供应商,gys_id from 材料供应商信息表 where gys_id ='"+gys_id+"'";
-                          SqlDataAdapter da_cl = new SqlDataAdapter(str_getcl, conn);
-                          DataSet ds_cl = new DataSet();
-                          da_cl.Fill(ds_cl, "材料供应商信息表");            
-                          DataTable dt_cl = ds_cl.Tables[0];
-                          String str_gysid = Convert.ToString(dt_cl.Rows[0]["gys_id"]);
-                          String str_gysname = Convert.ToString(dt_cl.Rows[0]["供应商"]);
+                          string str_getcl = "select 供应商,gys_id from 材料供应商信息表 where gys_id ='"+gys_id+"'";
+                            
+                          DataTable dt_cl = conn.GetDataTable(str_getcl);
+                          string str_gysid = Convert.ToString(dt_cl.Rows[0]["gys_id"]);
+                          string str_gysname = Convert.ToString(dt_cl.Rows[0]["供应商"]);
 
 
-                          String str_addgys = "insert into 采购商关注供应商表 (yh_id,gys_id,供应商名称) values ('"+yh_id+"','"+str_gysid+"','"+str_gysname+"')";
-                          SqlCommand cmd_addgys = new SqlCommand(str_addgys, conn); 
-                          cmd_addgys.ExecuteNonQuery();
+                          string str_addgys = "insert into 采购商关注供应商表 (yh_id,gys_id,供应商名称) values ('"+yh_id+"','"+str_gysid+"','"+str_gysname+"')";
+                                    conn.ExecuteSQL(str_addgys,false);
                       }
 
                       
@@ -123,11 +114,7 @@
             catch (Exception ex){
                 Response.Write(ex);
             }
-            finally{
-                conn.Close();
-            }           
-
-           
+              
 
 			Response.Write("<span class='dlzi'>尊敬的采购商，您好!</span>");
             Response.Write("<span class='dlzi'>该供应商信息已被收藏成功！</span>");

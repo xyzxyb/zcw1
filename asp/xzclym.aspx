@@ -196,17 +196,12 @@
 
     }
     protected DataTable dt_clfl = new DataTable();  //材料分类大类    
-    
+    DataConn objConn=new DataConn();
     protected void Page_Load(object sender, EventArgs e)
     {
-        string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-        SqlConnection conn = new SqlConnection(constr);
-        SqlDataAdapter da_clfl = new SqlDataAdapter("select 显示名字,分类编码 from 材料分类表 where len(分类编码)='2'", conn);
-        DataSet ds_clfl = new DataSet();
-        da_clfl.Fill(ds_clfl, "材料分类表");
-        dt_clfl = ds_clfl.Tables[0];     
-      
-
+       
+        dt_clfl =objConn.GetDataTable("select 显示名字,分类编码 from 材料分类表 where len(分类编码)='2'");
+     
         this.Items1 = new List<OptionItem>();  //数据表DataTable转集合  
         
         for (int x = 0; x < dt_clfl.Rows.Count; x++)

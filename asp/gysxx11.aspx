@@ -1,4 +1,9 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeFile="gysxx.aspx.cs" Inherits="asp_gysxx" %>
+<!--
+        供应商信息页面
+        文件名：gysxx.ascx
+        传入参数：gys_id    供应商编号
+               
+    -->
 <%@ Register Src="include/menu.ascx" TagName="Menu1" TagPrefix="uc1" %>
 
 <%@ Import Namespace="System.Data" %>
@@ -125,19 +130,19 @@
 			<div id="allmap"></div>
 <script type="text/javascript">
 
-    // 百度地图API功能
-    var map = new BMap.Map("allmap");
-    var point = new BMap.Point(116.331398, 39.897445);
-    map.centerAndZoom(point, 15);
-    // 创建地址解析器实例
-    var myGeo = new BMap.Geocoder();
-    // 将地址解析结果显示在地图上,并调整地图视野
-    myGeo.getPoint("<%=gys_addr %>", function (point) {
-        if (point) {
-            map.centerAndZoom(point, 13);
-            map.addOverlay(new BMap.Marker(point));
-        }
-    }, "<%=gys_addr %>");
+// 百度地图API功能
+var map = new BMap.Map("allmap");
+var point = new BMap.Point(116.331398,39.897445);
+map.centerAndZoom(point,15);
+// 创建地址解析器实例
+var myGeo = new BMap.Geocoder();
+// 将地址解析结果显示在地图上,并调整地图视野
+myGeo.getPoint("<%=gys_addr %>", function(point){
+  if (point) {
+    map.centerAndZoom(point, 13);
+    map.addOverlay(new BMap.Marker(point));
+  }
+}, "<%=gys_addr %>");
 </script>
                     
             
@@ -267,10 +272,10 @@
     <!-- footer 结束-->
 
     
-    <script>        function NewWindow(id) {
-            var url = "scgys.aspx?gys_id=" + id;
-            window.open(url, "", "height=400,width=400,status=no,location=no,toolbar=no,directories=no,menubar=yes");
-        }
+    <script>function NewWindow(id) {
+    var url = "scgys.aspx?gys_id=" + id;
+    window.open(url, "", "height=400,width=400,status=no,location=no,toolbar=no,directories=no,menubar=yes");
+}
 </script>
 </body>
 </html>

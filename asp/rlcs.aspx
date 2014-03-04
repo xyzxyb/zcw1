@@ -21,28 +21,22 @@
                protected DataTable dt_wrl_gys = new DataTable(); //未认领的供应商信息(材料供应商信息表) 	
                protected DataTable dt_yrl_gys= new DataTable(); //已经认领的供应商信息(材料供应商信息表) 	
 			   protected DataTable dt_dsh_gys = new DataTable(); //提示用户认领的供应商
-
+               DataConn objConn=new DataConn();
                protected void Page_Load(object sender, EventArgs e)
-               {  
-                    
-			        string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-                    SqlConnection conn = new SqlConnection(constr);
+               {                     
+			     
 					string yh_id = Convert.ToString(Session["yh_id"]);
 					
 					string str_yh = "select 类型 from 用户表 where yh_id ='"+ yh_id+"' ";
-                    SqlDataAdapter da_yh = new SqlDataAdapter(str_yh, conn);
-                    DataSet ds_yh = new DataSet();
-                    da_yh.Fill(ds_yh, "材料供应商信息表");
-                    DataTable dt_yh = ds_yh.Tables[0];
+                    
+                    DataTable dt_yh = objConn.GetDataTable(str_yh);
 					string gys_type = Convert.ToString(dt_yh.Rows[0]["类型"]);
 					
 					//根据用户输入的类型(生产商/分销商)查询相关的供应商
                     string str_wrl_gys = "select 供应商,gys_id from 材料供应商信息表 where 单位类型='"+gys_type+"' "
 					+"and yh_id is null or 单位类型='"+gys_type+"' and yh_id='' ";
-                    SqlDataAdapter da_wrl_gys = new SqlDataAdapter(str_wrl_gys, conn);
-                    DataSet ds_wrl_gys = new DataSet();
-                    da_wrl_gys.Fill(ds_wrl_gys, "材料供应商信息表");
-                    dt_wrl_gys = ds_wrl_gys.Tables[0];				                             
+                   
+                    dt_wrl_gys = objConn.GetDataTable(str_wrl_gys);	                             
                     	                
                }
 	           
@@ -97,16 +91,13 @@
 
 <%                 
 
-                    string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-                    SqlConnection conn = new SqlConnection(constr);
+                   
                     //查询供应商申请表 如果审批通过,显示被认领的供应商
 					string yh_id = Convert.ToString(Session["yh_id"]);
 					string str_select = "select count(*) from 供应商认领申请表 where yh_id = '"+yh_id +"'";
-					conn.Open();
-					SqlCommand cmd_select = new SqlCommand(str_select, conn);                           
-					Object obj_checkexist_gysid = cmd_select.ExecuteScalar();
-					conn.Close();
-					
+				                
+					Object obj_checkexist_gysid = objConn.DBLook(str_select);
+				
 					string gys_spjg = "";
                     if (obj_checkexist_gysid != null) 
                     {
@@ -114,49 +105,34 @@
                         if (count !=0 )  //供应商申请有记录 直接查询 是否审批通过
                         {        
                             
-                            String gyssq_select = "select gys_id, 审批结果 from 供应商认领申请表 where yh_id = '"+yh_id +"'";							
-                            SqlDataAdapter da_gyssq = new SqlDataAdapter (gyssq_select,conn);
-					        DataSet ds_gysxx = new DataSet();
-					        da_gyssq.Fill(ds_gysxx,"供应商认领申请表");					
-					        DataTable dt_gysxx = ds_gysxx.Tables[0];
+                            string gyssq_select = "select gys_id, 审批结果 from 供应商认领申请表 where yh_id = '"+yh_id +"'";							
+                           		
+					        DataTable dt_gysxx = objConn.GetDataTable(gyssq_select);
 					        gys_spjg = Convert.ToString(dt_gysxx.Rows[0]["审批结果"]);
 							string gys_id = Convert.ToString(dt_gysxx.Rows[0]["gys_id"]);
                             if(gys_spjg.Equals("通过"))	
 							{
 							   //更新材料供应商信息表
-                               String str_updateuser = "update 材料供应商信息表 set yh_id = '"+yh_id +"' where gys_id = '"+gys_id+"'";
-							   conn.Open();
-                               SqlCommand cmd_updateuser = new SqlCommand(str_updateuser, conn);         
-                               cmd_updateuser.ExecuteNonQuery();
-							   conn.Close();
+                               string str_updateuser = "update 材料供应商信息表 set yh_id = '"+yh_id +"' where gys_id = '"+gys_id+"'";
+                              objConn.ExecuteSQL(str_updateuser,false);
 							
 							   string str_yrl_gys = "select 供应商,gys_id,联系地址 from 材料供应商信息表 where yh_id ='"+ yh_id+"'";
-                               SqlDataAdapter da_yrl_gys = new SqlDataAdapter(str_yrl_gys, conn);
-                               DataSet ds_yrl_gys = new DataSet();
-                               da_yrl_gys.Fill(ds_yrl_gys, "材料供应商信息表");
-                               dt_yrl_gys = ds_yrl_gys.Tables[0];			   						                                                    
+                               dt_yrl_gys = objConn.GetDataTable(str_yrl_gys);			   						                                                    
                     
 							}
                             if(gys_spjg.Equals("不通过"))	
 							{
-							   String str_updateuser = "update 材料供应商信息表 set yh_id = '' where gys_id = '"+gys_id+"'";
-							   conn.Open();
-                               SqlCommand cmd_updateuser = new SqlCommand(str_updateuser, conn);         
-                               cmd_updateuser.ExecuteNonQuery();
-							   
+							   string str_updateuser = "update 材料供应商信息表 set yh_id = '' where gys_id = '"+gys_id+"'";
+						          objConn.ExecuteSQL(str_updateuser,false);
 							   //验证不通过,同时希望用户从新认领厂商,所以把原有的记录从供应商申请表中清除掉
-							   String str_delete = "delete 供应商认领申请表  where gys_id = '"+gys_id+"'";							  
-                               SqlCommand cmd_delete = new SqlCommand(str_delete, conn);         
-                               cmd_delete.ExecuteNonQuery();
-							   conn.Close();
+							   string str_delete = "delete 供应商认领申请表  where gys_id = '"+gys_id+"'";							  
+                                objConn.ExecuteSQL(str_delete,false);
 							}
 							if(gys_spjg.Equals("待审核"))	
 							{			  							
 							   string dsh_gys = "select 供应商,gys_id,联系地址 from 供应商认领申请表 where yh_id ='"+ yh_id+"'";
-                               SqlDataAdapter da_dsh_gys = new SqlDataAdapter(dsh_gys, conn);
-                               DataSet dsh_yrl_gys = new DataSet();
-                               da_dsh_gys.Fill(dsh_yrl_gys, "供应商认领申请表");
-                               dt_dsh_gys = dsh_yrl_gys.Tables[0];				                                                
+                              
+                               dt_dsh_gys = objConn.GetDataTable(dsh_gys);				                                                
                             }
                         }
 					         

@@ -24,12 +24,10 @@
 
     <script runat="server">                 
         
-		
+		DataConn objConn=new DataConn();
         protected void Page_Load(object sender, EventArgs e)
-        { 
-             string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-             SqlConnection conn = new SqlConnection(constr);
-			 String yh_id = Convert.ToString(Session["yh_id"]); 	 //获取表单的用户id	 
+        {            
+			 string yh_id = Convert.ToString(Session["yh_id"]); 	 //获取表单的用户id	 
              //string yh_id = "26";
 			 
              string gys_name = Request["gys_name"];                  //公司名字
@@ -45,11 +43,7 @@
 			 if(gys_name!="")
 			 {             		              			  
 			  string passed_gys;	  				  
-              SqlDataAdapter da_gyssq = new SqlDataAdapter("select 是否验证通过 from 用户表 where yh_id='"+yh_id+"' ", conn);
-              DataSet ds_gyssq = new DataSet();
-			  DataTable dt_gyssq = new DataTable();
-              da_gyssq.Fill(ds_gyssq, "用户表");           
-              dt_gyssq = ds_gyssq.Tables[0];
+             dt_gyssq=objConn.GetDataTable("select 是否验证通过 from 用户表 where yh_id='"+yh_id+"' ");          
               passed_gys = Convert.ToString(dt_gyssq.Rows[0]["是否验证通过"]);                              	
 	          if(passed_gys.Equals("通过"))   //如果用户在平台验证通过后 再继续点击保存 不在修改用户信息 直接返回
 			  {
@@ -59,13 +53,8 @@
 			  //更新用户表			  
 			  string sql_yhxx = "update  用户表 set updatetime=(select getdate()), 公司名称='"+gys_name+"',公司地址='"+gys_address+"',"
 			  +"公司主页='"+gys_homepage+"',公司电话='"+gys_phone+"',姓名='"+user_name+"',手机='"+user_phone+"', "
-			  +"QQ号码='"+user_qq+"',类型='"+scs_type+"',是否验证通过='待审核',等级='普通用户' where yh_id='"+yh_id+"' ";
-			  conn.Open();
-			  SqlCommand cmd_gysbtxx = new SqlCommand(sql_yhxx,conn);
-			  int ret = (int)cmd_gysbtxx.ExecuteNonQuery();
-				   
-       
-              conn.Close();	                                       
+			  +"QQ号码='"+user_qq+"',类型='"+scs_type+"',是否验证通过='待审核',等级='普通用户' where yh_id='"+yh_id+"' ";			 
+			  int ret = objConn.ExecuteSQLForCount(sql_yhxx,false);;	                                       
              }  
 		    
 		    //Response.Write("请耐心等待,我方工作人员会尽快给您回复!");

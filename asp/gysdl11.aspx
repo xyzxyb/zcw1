@@ -1,4 +1,9 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeFile="gysdl.aspx.cs" Inherits="asp_static_gysdl" %>
+<!--
+        供应商登陆页面
+        文件名：gysdl.ascx
+        传入参数：无
+               
+    -->
 <%@ Import Namespace="System.Data" %>
 <%@ Import Namespace="System.Data.SqlClient" %>
 <%@ Import Namespace="System" %>
@@ -7,8 +12,8 @@
 <%@ Import Namespace="System.Web.UI" %>
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Web.UI.WebControls" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=gb2312" />

@@ -1,10 +1,13 @@
-﻿<!--
-        网页头部，用在所有不需要登录的页面
-        文件名：header.aspx
-        传入参数：无        
--->
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="header.aspx.cs" Inherits="asp_static_header" %>
 
-<div class="box">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+</head>
+<body>
+    <div class="box">
     <div class="top"></div>
     <div class="logo">
         <a href="index.aspx">
@@ -17,10 +20,7 @@
             <img src="images/sss_03.jpg" onclick="javascript:fsubmit(document.form1);">
         </form>
     </div>
-    <%
-			HttpCookie QQ_id = Request.Cookies["QQ_id"];
-            Object logout = Session["logout"];
-            
+    <%		            
 			if ((QQ_id == null ) || (QQ_id != null && logout!= null ))
 			{
     %>
@@ -46,3 +46,6 @@
             }
 
     </script>
+
+</body>
+</html>

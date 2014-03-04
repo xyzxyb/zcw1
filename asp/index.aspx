@@ -88,8 +88,6 @@
     <!-- footer ½áÊø-->
 
 
-    </div>
-
     <!--  footer ¿ªÊ¼-->
     <script type="text/javascript"><!--//--><![CDATA[//><!--
     function menuFix() {

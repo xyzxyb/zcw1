@@ -1,38 +1,6 @@
-<!--
-    ¹©Ó¦ÉÌµÇÂ½ºó²Ù×÷Ò³Ãæ¹«¹²µÄÍ·²¿
-    ÎÄ¼þ£ºheader2.ascx
-    ´«Èë²ÎÊý£ºÎÞ
-
--->
-
-<%@ Import Namespace="System.Data" %>
-<%@ Import Namespace="System.Data.SqlClient" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.Collections.Generic" %>
-<%@ Import Namespace="System.Web" %>
-
-<script runat="server">
-            
-
-        protected DataTable dt_yh = new DataTable(); //ÓÃ»§Ãû×Ö(ÓÃ»§±í)    	
-        protected void Page_Load(object sender, EventArgs e)
-        {
-            HttpCookie QQ_id = Request.Cookies["QQ_id"];
-            if (QQ_id != null )
-            {
-            string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-            conn.Open();
-            SqlDataAdapter da_yh = new SqlDataAdapter("select ÐÕÃû from ÓÃ»§±í where QQ_id='"+QQ_id.Value+"'", conn);
-            DataSet ds_yh = new DataSet();
-            da_yh.Fill(ds_yh, "ÓÃ»§±í");           
-            dt_yh = ds_yh.Tables[0];
-            }
-		}	      
-	
+ï»¿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="header2.ascx.cs" Inherits="asp_include_header2" %>
 
 
-</script>
 
 <div class="box">
 
@@ -42,10 +10,11 @@
     </div>
     <div class="gyzy0">
         <div class="gyzy">
-            ×ð¾´µÄ
+            å°Šæ•¬çš„
 			<%foreach(System.Data.DataRow row in this.dt_yh.Rows){%>            
-            <span><%=row["ÐÕÃû"].ToString() %></span>           
+            <span><%=row["å§“å"].ToString() %></span>           
             <%}%>
-            ÏÈÉú/Å®Ê¿£¬ÄúºÃ
+            å…ˆç”Ÿ/å¥³å£«ï¼Œæ‚¨å¥½
         </div>
     </div>
+

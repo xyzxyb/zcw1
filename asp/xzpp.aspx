@@ -51,17 +51,13 @@
 
         protected DataTable dt_yjfl = new DataTable();   //材料分类大类
 		protected String gys_id;
-
+        DataConn objConn=new DataConn();
         protected void Page_Load(object sender, EventArgs e)
         {
             gys_id = Request["gys_id"].ToString();
 
-            String constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-            SqlDataAdapter da_yjfl = new SqlDataAdapter("select 显示名字,分类编码 from 材料分类表 where len(分类编码)='2'", conn);
-            DataSet ds_yjfl = new DataSet();
-            da_yjfl.Fill(ds_yjfl, "材料分类表");            
-            dt_yjfl = ds_yjfl.Tables[0];   
+            dt_yjfl = objConn.GetDataTable("select 显示名字,分类编码 from 材料分类表 where len(分类编码)='2'");
+           
          }
 
     </script>

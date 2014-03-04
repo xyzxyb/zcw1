@@ -9,23 +9,21 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <%
-            String constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);          
-            String yh_id = Session["yh_id"].ToString();
+    DataConn objConn=new DataConn();
+            string yh_id = Session["yh_id"].ToString();
          
 
             //É¾³ýÆ·ÅÆ
             {
-                conn.Open(); 
-                String ppid_str = Request["pp_id"]; 				//like ",214,238,237"
-                String ppid_list = ppid_str.Substring(1);
+                
+                string ppid_str = Request["pp_id"]; 				//like ",214,238,237"
+               string ppid_list = ppid_str.Substring(1);
                		
-                String str_update = "delete from  Æ·ÅÆ×Öµä where pp_id in ("+ ppid_list+")";
+                string str_update = "delete from  Æ·ÅÆ×Öµä where pp_id in ("+ ppid_list+")";
                     
-                SqlCommand cmd_update= new SqlCommand(str_update, conn);
-                int ret = (int)cmd_update.ExecuteNonQuery();	
+              
+                int ret = objConn.ExecuteSQLForCount(str_update,false);	
 								//Response.Write(str_update);
-                conn.Close();
         
             }	                    
 		

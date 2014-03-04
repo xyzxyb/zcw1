@@ -35,20 +35,17 @@
 
 <script runat="server">
 	public userInfoObject userInfo;
+    DataConn objConn=new DataConn();
 	protected void Page_Load(object sender, EventArgs e){
-	string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-  SqlConnection conn = new SqlConnection(constr);
-  conn.Open();
+	
   string yh_id ;
-  //yh_id= Session["yh_id"].ToString();
+ 
   yh_id="20";
   string queryUserInfo = "select * from 用户表 where yh_id='" + yh_id + "'";
-  SqlDataAdapter da = new SqlDataAdapter(queryUserInfo, conn);
-  DataSet ds = new DataSet();
-  da.Fill(ds, "用户表");
+ 
   DataTable userInfoDS = new DataTable();
-  userInfoDS = ds.Tables[0];
-  if (userInfoDS.Rows.Count > 0){
+  userInfoDS = objConn.GetDataTable(queryUserInfo);
+  if (userInfoDS!=null&&userInfoDS.Rows.Count > 0){
   	DataRow dr2 = userInfoDS.Rows[0];   
     userInfo = new userInfoObject();
   //userInfo.companyname = Convert.ToString(userInfoDS["显示名"]);
@@ -59,7 +56,6 @@
   //userInfo.contactqqid = Session["qq_id"].ToString();
    // contactorname.Text = userInfo.contactorname;
    // contactortel.Text = userInfo.contactortel;
-    conn.Close();
   }
 }
   
@@ -80,9 +76,7 @@
 	<script runat="server">
 	protected void updateUserInfo(object sender, EventArgs e)
   {
-  	string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-    SqlConnection conn = new SqlConnection(constr);
-    conn.Open();
+  
   	string yh_id;// = Session["yh_id"].ToString();
   	//yh_id = Session["yh_id"].ToString();
   	yh_id = "20";
@@ -95,10 +89,8 @@
   	                              "    set 手机='" + Request.Form["contactortel"]  + "', " +
   	                              "        姓名='" + Request.Form["contactorname"] + "'  " + 
   	                              "  where yh_id='" + yh_id + "'" ;
-  	SqlCommand cmd_updateUserinfo = new SqlCommand(updateUserinfoString, conn);         
-    cmd_updateUserinfo.ExecuteNonQuery();
-    //label1.Text=str_cancelfollow;
-  	conn.Close();
+                                  objConn.ExecuteSQL(updateUserinfoString,true)
+  
   	//label1.Text = updateUserinfoString;
   	userInfo.contactorname =Request.Form["contactorname"];
     userInfo.contactortel =  Request.Form["contactortel"];

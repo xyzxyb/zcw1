@@ -66,48 +66,29 @@
         protected int total_pages =1;
         protected int current_page = 1;
         protected string wz_id;
-
+        DataConn objConn=new DataConn();
         protected void Page_Load(object sender, EventArgs e)
         {
-            string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-            conn.Open();
+            
             wz_id=Request["wz_id"];  //获取文章id
-            SqlDataAdapter da = new SqlDataAdapter("select distinct 标题,作者, wz_id from 文章表 where wz_id='"+wz_id+"'", conn);            
-            DataSet ds = new DataSet();
-            da.Fill(ds, "文章表");        
-            dt = ds.Tables[0];
-
-            SqlDataAdapter da2 = new SqlDataAdapter("select 厂商名称,gys_id from 文章和厂商相关表 where wz_id='"+wz_id+"'", conn);            
-            DataSet ds2 = new DataSet();
-            da2.Fill(ds2, "文章和厂商相关表");        
-            dt2 = ds2.Tables[0];
-
-            SqlDataAdapter da3 = new SqlDataAdapter("select 产品名称,cl_id from 文章和材料表相关表 where wz_id='"+wz_id+"' ", conn);            
-            DataSet ds3 = new DataSet();
-            da3.Fill(ds3, "文章和材料表相关表");        
-            dt3 = ds3.Tables[0];   
-
+           dt = objConn.GetDataTable("select distinct 标题,作者, wz_id from 文章表 where wz_id='"+wz_id+"'");            
+            dt2 = objConn.GetDataTable("select 厂商名称,gys_id from 文章和厂商相关表 where wz_id='"+wz_id+"'");          
+            dt3 =objConn.GetDataTable("select 产品名称,cl_id from 文章和材料表相关表 where wz_id='"+wz_id+"' ");           
+          
 
             string page = Request["p"];
             if (page != null) current_page = int.Parse(page);   
                     
             string strr="select 页面内容, 页面编号, wz_id from 文章和内容相关表 where wz_id='"+wz_id+"' and 页面编号='"+ current_page+"'";  
-            SqlDataAdapter da1 = new SqlDataAdapter(strr, conn);            
-            DataSet ds1 = new DataSet();
-            da1.Fill(ds1, "文章和内容相关表");   
-            dt1 = ds1.Tables[0];
+            dt1 = objConn.GetDataTable(strr);
 
             string total_sql_str = "select count(*) from 文章和内容相关表 where wz_id='"+wz_id+"'";
-            SqlCommand cmd = new SqlCommand(total_sql_str,conn);
-            Object result = cmd.ExecuteScalar();
+           
+            Object result = objConn.DBLook(total_sql_str);
             if (result != null) 
             {
                 total_pages = int.Parse(Convert.ToString(result));
             }             
-
-            conn.Close();
-            
         
         }
 			

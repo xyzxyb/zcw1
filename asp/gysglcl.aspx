@@ -114,6 +114,7 @@
         protected DataTable dt_cl = new DataTable();    //根据供应商id查询显示名,分类编码(材料表)
         protected DataTable dt_yjfl = new DataTable();  //取一级分类显示名称(材料分类表)
 		protected DataTable dt_ejfl = new DataTable();  //取二级分类显示名称(材料分类表)
+                DataConn objConn=new DataConn();
 		protected void Page_Load(object sender, EventArgs e)
 		{
 		   Products_gys_cl();
@@ -121,23 +122,16 @@
 		
         protected void Products_gys_cl()
         {
-            string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);            
-			String yh_id = Convert.ToString(Session["yh_id"]);   //获取session中yh_id
+              
+			string yh_id = Convert.ToString(Session["yh_id"]);   //获取session中yh_id
 			
 			//根据用户id 查询供应商id
-			SqlDataAdapter da_gys = new SqlDataAdapter("select gys_id from 材料供应商信息表 where yh_id='"+yh_id+"' ", conn);   //141
-            DataSet ds_gys = new DataSet();
-            da_gys.Fill(ds_gys, "材料供应商信息表");           
-            DataTable dt_gys = ds_gys.Tables[0];
+			DataTable dt_gys=objConn.GetDataTable("select gys_id from 材料供应商信息表 where yh_id='"+yh_id+"' ");   //141
 			string gys_id = Convert.ToString(dt_gys.Rows[0]["gys_id"]);
 			
 			//根据供应商id 查询材料信息
-            SqlDataAdapter da_cl = new SqlDataAdapter("select cl_id,显示名,分类编码 from 材料表 where gys_id='"+gys_id+"'and 是否启用='1' ", conn);
-            DataSet ds_cl = new DataSet();
-            da_cl.Fill(ds_cl, "材料表");           
-            dt_cl = ds_cl.Tables[0];
-			
+            dt_cl  = objConn.GetDataTable("select cl_id,显示名,分类编码 from 材料表 where gys_id='"+gys_id+"'and 是否启用='1' ");           
+        
 			////数据表DataTable转集合                   
             this.Cllist = new List<CLObject>();
 			for(int x=0;x<dt_cl.Rows.Count;x++)
@@ -154,10 +148,8 @@
 			   if(v.Cl_flbm.ToString()!=null&Convert.ToString(v.Cl_flbm).Length==4)
 			   {
 			   string code = v.Cl_flbm.ToString().Substring(0, 2);	//取分类编码前两位再次进行查询 最终获得一级分类的名字	
-			   SqlDataAdapter da_yjfl = new SqlDataAdapter("select  显示名字 from 材料分类表 where 分类编码='"+code+"' ", conn);
-               DataSet ds_yjfl = new DataSet();
-               da_yjfl.Fill(ds_yjfl, "材料分类表");           
-               dt_yjfl = ds_yjfl.Tables[0];
+			  dt_yjfl = objConn.GetDataTable("select  显示名字 from 材料分类表 where 分类编码='"+code+"' ");
+
 			   }
 			}
 			this.Items1 = new List<FLObject_yj>();
@@ -170,12 +162,9 @@
 		    } 
 			
 			//取二级分类名称
-			SqlDataAdapter da_ejfl = new SqlDataAdapter("select 显示名字,分类编码 from 材料分类表 where  "
-			+"分类编码 in(select 分类编码 from 材料表 where gys_id='"+gys_id+"'and 是否启用='1' )", conn);
-            DataSet ds_ejfl = new DataSet();
-            da_ejfl.Fill(ds_ejfl, "材料分类表");            
-            dt_ejfl = ds_ejfl.Tables[0];
-			
+			dt_ejfl = objConn.GetDataTable("select 显示名字,分类编码 from 材料分类表 where  "
+			+"分类编码 in(select 分类编码 from 材料表 where gys_id='"+gys_id+"'and 是否启用='1' )");
+        
 			this.Items2 = new List<FLObject_ej>();
 			for(int x=0;x<dt_ejfl.Rows.Count;x++)
             {
@@ -189,26 +178,19 @@
         } 
           
           protected void dumpFollowCLs(object sender, EventArgs e)
-          {
-  	         string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-             SqlConnection conn = new SqlConnection(constr);             
+          {  	               
   	         string yh_id = Session["yh_id"].ToString();
 			 
 			 //根据用户id 查询供应商id
-			 SqlDataAdapter da_gys = new SqlDataAdapter("select gys_id from 材料供应商信息表 where yh_id='"+yh_id+"' ", conn);
-             DataSet ds_gys = new DataSet();
-             da_gys.Fill(ds_gys, "材料供应商信息表");           
-             DataTable dt_gys = ds_gys.Tables[0];
+			 DataTable dt_gys = objConn.GetDataTable("select gys_id from 材料供应商信息表 where yh_id='"+yh_id+"' ");
+           
 			 string gys_id = Convert.ToString(dt_gys.Rows[0]["gys_id"]);
   	         
 			 //根据gys_id 查询材料表相关的数据 以便导出excel 表格
-  	         string query_cl_gys = "select*from 材料表 where gys_id='"+gys_id+"' ";
-  	
-  	         SqlDataAdapter da = new SqlDataAdapter(query_cl_gys, conn);
-             DataSet clds = new DataSet();
-             da.Fill(clds, "材料表");              
+  	         string query_cl_gys = "select*from 材料表 where gys_id='"+gys_id+"' ";  	
+  	           
              DataTable cldt = new DataTable();
-             cldt = clds.Tables[0];
+             cldt = objConn.GetDataTable(query_cl_gys);
              outToExcel(cldt);
          }
 		 
@@ -271,17 +253,11 @@
 <script runat="server">
           void Delete_cl(object sender, EventArgs e)
           {
-		    
-  	        string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-            conn.Open();
+		   
   	        String yh_id = Convert.ToString(Session["yh_id"]);   //获取session中yh_id
 			
 			//根据用户id 查询供应商id
-			SqlDataAdapter da_gys = new SqlDataAdapter("select gys_id from 材料供应商信息表 where yh_id='"+yh_id+"' ", conn);
-            DataSet ds_gys = new DataSet();
-            da_gys.Fill(ds_gys, "材料供应商信息表");           
-            DataTable dt_gys = ds_gys.Tables[0];
+			 DataTable dt_gys = objConn.GetDataTable("select gys_id from 材料供应商信息表 where yh_id='"+yh_id+"' ");            
 			string gys_id = Convert.ToString(dt_gys.Rows[0]["gys_id"]);
   	        
   	        //获取复选框选中的cl_id
@@ -289,11 +265,7 @@
   	        
 			//通过获取的供应商id和cl_id进行删除
   	        string str_cancelfollow = "update 材料表 set 是否启用='0' where gys_id ='" +  gys_id + "' and cl_id in (" + clidstr + ")" ;
-  	        SqlCommand cmd_cancelfollow = new SqlCommand(str_cancelfollow, conn);         
-            cmd_cancelfollow.ExecuteNonQuery();
-    
-   
-  	        conn.Close();
+  	       objConn.ExecuteSQL(str_cancelfollow,true);
             Products_gys_cl();
          }
 </script>
@@ -320,26 +292,19 @@
                         <h2 onclick="javascript:ShowMenu(this,<%=secondlevel %> )"><a href="javascript:void(0)">+ <%=menu2.Ejfl_Name%></a></h2>
                         <ul class="no">
                           <% 
-                            //二级下的分类产品要根据,具体的二级分类编码进行查询						  
+                            //二级下的分类产品要根据,具体的二级分类编码进行查询					  
                             							
-							string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-                            SqlConnection conn = new SqlConnection(constr); 
+						
                             String yh_id = Convert.ToString(Session["yh_id"]);   //获取session中yh_id							
 			                
 							//根据用户id 查询供应商id
-			                SqlDataAdapter da_gys = new SqlDataAdapter("select gys_id from 材料供应商信息表 where yh_id='"+yh_id+"' ", conn);
-                            DataSet ds_gys = new DataSet();
-                            da_gys.Fill(ds_gys, "材料供应商信息表");           
-                            DataTable dt_gys = ds_gys.Tables[0];
+			               DataTable dt_gys= objConn.GetDataTable("select gys_id from 材料供应商信息表 where yh_id='"+yh_id+"' ");
 							
 			                string gys_id = Convert.ToString(dt_gys.Rows[0]["gys_id"]);
 							string flbm = menu2.Ej_flbm;
 							
-                            SqlDataAdapter da_cls = new SqlDataAdapter("select cl_id,显示名,分类编码 from 材料表 where gys_id='"+gys_id+"'and 分类编码='"+flbm+"' ", conn);
-                            DataSet ds_cls = new DataSet();
-                            da_cls.Fill(ds_cls, "材料表");           
-                            DataTable dt_cls = ds_cls.Tables[0];
-						
+                           DataTable dt_cls = objConn.GetDataTable("select cl_id,显示名,分类编码 from 材料表 where gys_id='"+gys_id+"'and 分类编码='"+flbm+"' ");
+                           
                             foreach (System.Data.DataRow row in dt_cls.Rows){
       	        
                             %>

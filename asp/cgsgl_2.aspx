@@ -126,55 +126,35 @@
   
 
   protected DataTable dt = new DataTable(); //取一级分类名称
-  protected String yh_id;
+  protected String yh_id;、
+  DataConn objConn=new DataConn();
   protected void Page_Load(object sender, EventArgs e)
   {
         
         String QQid = Request.Cookies["QQ_id"].Value;
 
-        String constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-        SqlConnection conn = new SqlConnection(constr);
-        String str_checkuserexist = "select count(*) from 用户表 where QQ_id = '"+QQid+"'";
-        SqlCommand cmd_checkuserexist = new SqlCommand(str_checkuserexist, conn);
-        conn.Open();
-        Object obj_checkuserexist = cmd_checkuserexist.ExecuteScalar();
+      
+        String str_checkuserexist = "select * from 用户表 where QQ_id = '"+QQid+"'";
+     int obj_checkuserexist = objConn.GetRowCount(str_checkuserexist);
         
-        if (obj_checkuserexist != null) 
-        {
-             int count = Convert.ToInt32(obj_checkuserexist);
              if (count ==0 )  //qq_id 不存在，需要增加用户表
              {
 
                    String str_insertuser = "insert into 用户表 (QQ_id) VALUES ('"+ QQid+"')";
-                   SqlCommand cmd_insertuser = new SqlCommand(str_insertuser, conn);         
-                   cmd_insertuser.ExecuteNonQuery();
+                  objConn.ExecuteSQL(str_insertuser,false);
                    String str_updateuser = "update 用户表 set yh_id = (select myId from 用户表 where QQ_id = '"+QQid+"') where QQ_id = '"+QQid+"'";
-                   SqlCommand cmd_updateuser = new SqlCommand(str_updateuser, conn);         
-                   cmd_updateuser.ExecuteNonQuery();                  
+                     objConn.ExecuteSQL(str_insertuser,true);             
                   
               }
-              SqlDataAdapter da = new SqlDataAdapter("select 姓名,yh_id,是否验证通过,类型,等级 from 用户表 where QQ_id='"+QQid+"'", conn);
-              DataSet ds = new DataSet();
-              da.Fill(ds, "用户表");           
-              DataTable dt = ds.Tables[0];
+              DataTable dt = objConn.GetDataTable( "select 姓名,yh_id,是否验证通过,类型,等级 from 用户表 where QQ_id='"+QQid+"'");
               yh_id = Convert.ToString(dt.Rows[0]["yh_id"]);
               Session["yh_id"] = yh_id;
-                      
-               
-         }
-         conn.Close();
-                
+
     
         listFollowCLIDs();
   }
   protected void listFollowCLIDs()
-  {
-    
-	  string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-    SqlConnection conn = new SqlConnection(constr);
-    conn.Open();
-    
-   
+  {   
     yh_id = Session["yh_id"].ToString();
     //yh_id ="20";
   	string querySQL = 
@@ -184,36 +164,24 @@
       "   where b.yh_id='"  + yh_id  +  "' and b.cl_id=c.cl_id  ) as  d " + 
   		" where a.分类编码=d.flbm  " + 
      	" 	 or a.分类编码=left(d.flbm,2)";
-         
-    SqlDataAdapter da = new SqlDataAdapter(querySQL, conn);
-    DataSet ds = new DataSet();
-    da.Fill(ds, "材料分类表");  
-    dt = ds.Tables[0];
+        
+        DataTable dt=new DataTable();
+    dt = objConn.GetDataTable(querySQL);
       
     querySQL = 
    		"	select b.cl_id ,分类编码,显示名 " + 
    		"   from 采购商关注材料表 as a ,材料表 as b  " +
       "  where a.yh_id='" + yh_id + "' and a.cl_id=b.cl_id order by b.cl_id";
-         
-    da = new SqlDataAdapter(querySQL, conn);
-    DataSet clds = new DataSet();
-    da.Fill(clds, "材料表"); 
-    DataTable cldt = new DataTable();
-    cldt = clds.Tables[0];
+           DataTable cldt=new DataTable();
+    cldt = objConn.GetDataTable(querySQL);
     
     querySQL = 
    		"	select a.gys_id ,a.供应商 " + 
    		"   from 材料供应商信息表 as a ,采购商关注供应商表 as b  " +
       "  where b.yh_id='" + yh_id + "' and a.gys_id=b.gys_id order by a.gys_id";
       
-    da = new SqlDataAdapter(querySQL, conn);
-    DataSet clgysds = new DataSet();
-    da.Fill(clgysds, "材料供应商信息表"); 
-    DataTable clgysdt = new DataTable();
-    clgysdt = clgysds.Tables[0];
-    
-    conn.Close(); 
-    
+   DataTable clgysdt=new DataTable();
+    clgysdt = objConn.GetDataTable(querySQL);
 		
     ////分类表DataTable转集合                  
     this.Items1 = new List<FLObject>();
@@ -287,20 +255,13 @@
   
   protected void dumpFollowCLs(object sender, EventArgs e)
   {
-  	string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-    SqlConnection conn = new SqlConnection(constr);
-    conn.Open();
   	string yh_id = Session["yh_id"].ToString();
   	//yh_id = "20";
   	string str_queryallcl = "select b.* from 采购商关注材料表 as  a ,材料表 as b " + 
   	                        " where a.yh_id='"  + yh_id + "'  and a.cl_id = b.cl_id " ;
-  	
-  	SqlDataAdapter da = new SqlDataAdapter(str_queryallcl, conn);
-    DataSet clds = new DataSet();
-    da.Fill(clds, "材料表"); 
-    conn.Close();
+
     DataTable cldt = new DataTable();
-    cldt = clds.Tables[0];
+    cldt = objConn.GetDataTable(str_queryallcl);
     outToExcel(cldt);
   }
   private StringBuilder  AppendCSVFields(StringBuilder argSource, string argFields)
@@ -367,9 +328,7 @@
             <script runat="server">
   void cancelFollows(object sender, EventArgs e)
   {
-  	string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-    SqlConnection conn = new SqlConnection(constr);
-    conn.Open();
+
   	string yh_id;
   	yh_id = Session["yh_id"].ToString();
   	//yh_id = "20";
@@ -377,16 +336,12 @@
   	//clidstr = ",21,100";
   	//clidstr =clidstr.Substring(1);
   	string str_cancelfollow = "delete 采购商关注材料表 where yh_id ='" +  yh_id + "' and cl_id in (" + clidstr + ")" ;
-  	SqlCommand cmd_cancelfollow = new SqlCommand(str_cancelfollow, conn);         
-    cmd_cancelfollow.ExecuteNonQuery();
+  	objConn.ExecuteSQL(str_cancelfollow,false);
     
     string gysids = Request.Form["gysid"];
     string sql_cancelfollowgys = "delete 采购商关注供应商表 where yh_id ='" +  yh_id + "' and gys_id in (" + gysids + ")" ;
-  	
-  	cmd_cancelfollow = new SqlCommand(sql_cancelfollowgys, conn);         
-    cmd_cancelfollow.ExecuteNonQuery();
+  	objConn.ExecuteSQL(sql_cancelfollowgys,true);
     label1.Text=sql_cancelfollowgys;
-  	conn.Close();
     listFollowCLIDs();
   }
   

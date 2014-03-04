@@ -159,43 +159,30 @@
             }
       
         }
-
+        DataConn objConn=new DataConn();
         private DataTable GetProductFormDB(int begin, int end ,string type)
         {
-            string connString = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;         
-            SqlCommand cmd = new SqlCommand("wz_Paging");
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.Add("@begin", SqlDbType.Int).Value = begin;  //开始页第一条记录
-            cmd.Parameters.Add("@end", SqlDbType.Int).Value = end;      //开始页最后一条记录
-			cmd.Parameters.Add("@文档类型", SqlDbType.VarChar,20).Value = type;      //传材料编码给材料表,执行存储过程
+                     SqlParameter[] coll=
+                     {
+                     new SqlParameter("@begin",begin),
+                     new SqlParameter("@end",end),
+                     new SqlParameter("@文档类型",type)                
+                    }
+                    dt=objConn.ExecuteProcForTable("wz_Paging",coll)
 
-            SqlDataAdapter sda = new SqlDataAdapter(cmd);            
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                cmd.Connection = conn;
-                conn.Open();
-                sda.Fill(dt);
-                conn.Close();
-            }
             return dt;
         }
 
         //从数据库获取记录的总数量
         private int GetProductCount()
         {
-            string connString = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            String type = Request["id"];   //获取传过来的文档类型参数
+            
+            string type = Request["id"];   //获取传过来的文档类型参数
             string sql = "select count(wz_Id) from 文章表 where 文档类型='"+type+"' ";
-            SqlCommand cmd = new SqlCommand(sql);
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                cmd.Connection = conn;
-                conn.Open();
-                object obj = cmd.ExecuteScalar();
-                conn.Close();
+          
+                object obj = objConn.DBLook(sql);              
                 int count = (int)obj;
-                return count;
-            }
+                return count;        
         }
          
     </script>

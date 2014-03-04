@@ -10,21 +10,22 @@
 <%@ Import Namespace="System" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="System.Web" %>
+<script runat=server>	 
 
-<script runat="server"> 
-         
-		 
-
-        protected DataTable dt = new DataTable();   //材料名字,存放地址(材料多媒体信息表)        
+        protected DataTable dt = new DataTable();   //材料名字,存放地址(材料多媒体信息表)    
+         DataConn objConn=new DataConn();
+         public string SQL="";
         protected void Page_Load(object sender, EventArgs e)
-        {		      
-            string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-            conn.Open();
-            SqlDataAdapter da = new SqlDataAdapter("select 存放地址,材料名称,cl_id from 材料多媒体信息表 where  是否上头条='是' and 媒体类型 = '图片' and 大小='大'", conn);
-            DataSet ds = new DataSet();
-            da.Fill(ds, "材料多媒体信息表");            
-            dt = ds.Tables[0];     		
+        {		
+            SQL="select 存放地址,材料名称,cl_id from 材料多媒体信息表 where  是否上头条='是' and 媒体类型 = '图片' and 大小='大'";
+         dt=objConn.GetDataTable(SQL);
+           // string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
+           // SqlConnection conn = new SqlConnection(constr);
+           // conn.Open();
+          //  SqlDataAdapter da = new SqlDataAdapter("select 存放地址,材料名称,cl_id from 材料多媒体信息表 where  是否上头条='是' and 媒体类型 = '图片' and 大小='大'", conn);
+          //  DataSet ds = new DataSet();
+           // da.Fill(ds, "材料多媒体信息表");            
+          //  dt = ds.Tables[0];     		
 			
           
 		   
@@ -38,6 +39,9 @@
         var imgtext = new Array();
         var imgLink = new Array();
 	<% 
+    if (dt!=null&&dt.Rows.Count>0) {
+    
+
 		 Response.Write("imgUrl[1] = '"+dt.Rows[0]["存放地址"].ToString()+"';\n");
 		 Response.Write("imgtext[1] = '"+dt.Rows[0]["材料名称"].ToString()+"'\n");
 		 Response.Write("imgLink[1] = 'clxx.aspx?cl_id="+dt.Rows[0]["cl_id"].ToString()+"';\n"); 
@@ -47,7 +51,7 @@
 		 Response.Write("imgUrl[3] = '"+dt.Rows[2]["存放地址"].ToString()+"';\n");
 		 Response.Write("imgtext[3] = '"+dt.Rows[2]["材料名称"].ToString()+"';\n");
 		 Response.Write("imgLink[3] = 'clxx.aspx?cl_id="+dt.Rows[2]["cl_id"].ToString()+"';\n");       
-		     
+		   }  
 		%>
 
 

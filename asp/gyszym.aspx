@@ -31,15 +31,14 @@
 
 
     <% 
+        DataConn objConn = new DataConn();
         String QQid = Request.Cookies["QQ_id"].Value;   //首先获取cookie中的QQ_id
 		
         string yh_id = "";
-        String constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-        SqlConnection conn = new SqlConnection(constr);
-        String str_checkuserexist = "select count(*) from 用户表 where QQ_id = '" + QQid + "'";
-        SqlCommand cmd_checkuserexist = new SqlCommand(str_checkuserexist, conn);
-        conn.Open();
-        Object obj_checkuserexist = cmd_checkuserexist.ExecuteScalar();
+      
+        string str_checkuserexist = "select count(*) from 用户表 where QQ_id = '" + QQid + "'";
+      
+        Object obj_checkuserexist = objConn.DBLook(str_checkuserexist);
 
         if (obj_checkuserexist != null)
         {
@@ -47,45 +46,36 @@
             if (count == 0)  //qq_id 不存在，需要增加用户表
             {
 
-                String str_insertuser = "insert into 用户表 (QQ_id) VALUES ('" + QQid + "')";
-                SqlCommand cmd_insertuser = new SqlCommand(str_insertuser, conn);
-                cmd_insertuser.ExecuteNonQuery();
-                String str_updateuser = "update 用户表 set yh_id = (select myId from 用户表 where QQ_id = '" + QQid + "')"
+                string str_insertuser = "insert into 用户表 (QQ_id) VALUES ('" + QQid + "')";
+                objConn.ExecuteSQL(str_insertuser,false);
+                string str_updateuser = "update 用户表 set yh_id = (select myId from 用户表 where QQ_id = '" + QQid + "')"
 				+",updatetime=(select getdate()),注册时间=(select getdate())where QQ_id = '" + QQid + "'";
-                SqlCommand cmd_updateuser = new SqlCommand(str_updateuser, conn);
-                cmd_updateuser.ExecuteNonQuery();
-
+                  objConn.ExecuteSQL(str_updateuser,false);
             }
 
         }
-        SqlDataAdapter da = new SqlDataAdapter("select 姓名,yh_id,是否验证通过,类型,等级 from 用户表 where QQ_id='" + QQid + "'", conn);
-        DataSet ds = new DataSet();
-        da.Fill(ds, "用户表");
-        DataTable dt = ds.Tables[0];
+         DataTable dt = objConn.GetDataTable("select 姓名,yh_id,是否验证通过,类型,等级 from 用户表 where QQ_id='" + QQid + "'");
+        
         yh_id = Convert.ToString(dt.Rows[0]["yh_id"]);
         Session["yh_id"] = yh_id;
-        String passed = Convert.ToString(dt.Rows[0]["是否验证通过"]);
-        String name = Convert.ToString(dt.Rows[0]["姓名"]);
+        string passed = Convert.ToString(dt.Rows[0]["是否验证通过"]);
+        string name = Convert.ToString(dt.Rows[0]["姓名"]);
         
         //(供应商申请)的yh_id 是在认领厂商之后更新的
        
         
         string str_gyssq = "select count(*) from 供应商认领申请表 where yh_id='" + yh_id + "'";
-        SqlCommand cmd_select = new SqlCommand(str_gyssq, conn);
-        Object obj_checkexist_yhid = cmd_select.ExecuteScalar();
-        conn.Close();
-        String passed_gys = "";
+       
+        Object obj_checkexist_yhid = objConn.DBLook(str_gyssq);
+        string passed_gys = "";
         if (obj_checkexist_yhid != null)
         {
             int count = Convert.ToInt32(obj_checkexist_yhid);
             if (count != 0)  //如果(供应商申请)不更新 就没有yh_id 往下不执行
             {
-
-                SqlDataAdapter da_gyssq = new SqlDataAdapter("select 审批结果 from 供应商认领申请表 where yh_id='" + yh_id + "' ", conn);
-                DataSet ds_gyssq = new DataSet();
-                DataTable dt_gyssq = new DataTable();
-                da_gyssq.Fill(ds_gyssq, "供应商申请");
-                dt_gyssq = ds_gyssq.Tables[0];
+                 DataTable dt_gyssq = new DataTable();
+                dt_gyssq =objConn.GetDataTable("select 审批结果 from 供应商认领申请表 where yh_id='" + yh_id + "' ");              
+              
                 passed_gys = Convert.ToString(dt_gyssq.Rows[0]["审批结果"]);
             }
         }	

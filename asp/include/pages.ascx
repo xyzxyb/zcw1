@@ -1,70 +1,13 @@
-<%@ Import Namespace="System.Data" %>
-<%@ Import Namespace="System.Data.SqlClient" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.Collections.Generic" %>
-<%@ Import Namespace="System.Linq" %>
-<%@ Import Namespace="System.Web" %>
-
-<script runat="server">
-        protected DataTable dt = new DataTable();
-		
-        protected void Page_Load(object sender, EventArgs e)
-        {
-            string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-            conn.Open();         
-            string strr = "select count(wz_id),±êÌâ,·¢±íÊ±¼ä from ÎÄÕÂ±í where ÎÄµµÀàÐÍ='²ÄÁÏ·¢ÏÖ' group by wz_id,±êÌâ,·¢±íÊ±¼ä  ";
-            SqlCommand cmd = new SqlCommand(strr, conn);
-            SqlDataReader dr = cmd.ExecuteReader();
-            while (dr.Read())
-            {                
-                int str = (int)dr.GetInt32(0);
-                OutputBySize(str);
-            }
-           conn.Close(); 
-        }
-
-               public string OutputBySize(int _intTotalPage)//·ÖÒ³º¯Êý
-        {
-                string _strRet = "";           
-                int _intCurrentPage = 1;//ÉèÖÃµÚÒ»Ò³Îª³õÊ¼Ò³                           
-                if (Request.QueryString["ps"] != null)
-                {//set Current page number
-                  
-                        _intCurrentPage = Convert.ToInt32(Request.QueryString["ps"]);
-                        if (_intCurrentPage > _intTotalPage)
-                        {
-                            _intCurrentPage = _intTotalPage;
-                        }
-                    }          
-               
-                string _strPageInfo = "";
-                for (int i = 1; i <= _intTotalPage; i++)
-                {
-                    if (i == _intCurrentPage)
-                        _strPageInfo += "[" + i + "]";
-                    else
-                        _strPageInfo += " <a href=?ps=" + i + ">[" + i + "]</a> ";
-                }
-                if (_intCurrentPage > 1)
-                    _strPageInfo = "<a href=?ps=" + (_intCurrentPage - 1) + ">ÉÏÒ»Ò³</a>" + _strPageInfo;
-                if (_intCurrentPage < _intTotalPage)
-                    _strPageInfo += "<a href=?ps=" + (_intCurrentPage + 1) + ">ÏÂÒ»Ò³</a>";                    
-         
-                _strRet += 5;    //Êä³öÏÔÊ¾¸÷¸öÒ³Âë        
-                return _strRet;
-        }
-</script>
-
+ï»¿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="pages.ascx.cs" Inherits="asp_include_pages" %>
 <div class="fy0">
     <div class="fy">
         _strRet
- <a href="#">Î²Ò³</a>
-        Ö±½Óµ½µÚ
+ <a href="#">å°¾é¡µ</a>
+        ç›´æŽ¥åˆ°ç¬¬
         <select name="" class="fu">
             <option>1</option>
         </select>
-        Ò³
+        é¡µ
     </div>
 </div>
 

@@ -24,21 +24,18 @@
 </head>
 
 <script runat="server">
-        protected DataTable dt_yh = new DataTable();  //供应商补填信息(用户表)          
+        protected DataTable dt_yh = new DataTable();  //供应商补填信息(用户表)    
+    DataConn objConn=new DataConn();
         protected void Page_Load(object sender, EventArgs e)
         {            
-			string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-            
-            String yh_id = Convert.ToString(Session["yh_id"]); 	 //获取表单的用户id	 
+			
+            string yh_id = Convert.ToString(Session["yh_id"]); 	 //获取表单的用户id	 
 			//String yh_id = "29"; 	 //获取表单的用户id	
             if(yh_id!="")
 			{
-              String str_gysxx = "select 公司名称,公司地址,公司电话,公司主页,手机,类型,QQ号码,姓名,是否验证通过 from 用户表 where  yh_id='"+yh_id+"' ";
-              SqlDataAdapter da_yh = new SqlDataAdapter(str_gysxx, conn);
-			  DataSet ds_yh = new DataSet();
-              da_yh.Fill(ds_yh, "用户表");
-              dt_yh = ds_yh.Tables[0]; 	              
+              string str_gysxx = "select 公司名称,公司地址,公司电话,公司主页,手机,类型,QQ号码,姓名,是否验证通过 from 用户表 where  yh_id='"+yh_id+"' ";
+              
+              dt_yh =objConn.GetDataTable(str_gysxx); 	              
             }		            	
         }				   
 </script>

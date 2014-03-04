@@ -89,18 +89,12 @@
          protected DataTable dt_clfl = new DataTable();  //材料分类大类   
          protected DataTable dt_clxx = new DataTable();    //材料信息
          protected DataTable dt_clsx = new DataTable();    //材料属性名称,属性值(材料属性表)	 
-    
+        DataConn objConn=new DataConn();
          protected void Page_Load(object sender, EventArgs e)
          {
-             string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-             SqlConnection conn = new SqlConnection(constr); 
-		
 		     string cl_id = Request["cl_id"];   //获取材料id
 			 
-             SqlDataAdapter da_clfl = new SqlDataAdapter("select 显示名字,分类编码 from 材料分类表 where len(分类编码)='2'", conn);
-             DataSet ds_clfl = new DataSet();
-             da_clfl.Fill(ds_clfl, "材料分类表");
-             dt_clfl = ds_clfl.Tables[0];         
+               dt_clfl = objConn.GetDataTable("select 显示名字,分类编码 from 材料分类表 where len(分类编码)='2'");                
 
              this.Items1 = new List<OptionItem>();  //数据表DataTable转集合  
         
@@ -116,16 +110,12 @@
                 }
              }    
              String str_clxx = "select 显示名,分类名称,品牌名称,规格型号,计量单位,单位体积,单位重量,分类编码,说明 from 材料表 where cl_id='"+cl_id+"' ";
-             SqlDataAdapter da_clxx = new SqlDataAdapter(str_clxx, conn);
-			 DataSet ds_clxx = new DataSet();
-             da_clxx.Fill(ds_clxx, "材料表");
-             dt_clxx = ds_clxx.Tables[0];
+            
+             dt_clxx objConn.GetDataTable(str_clxx);
 			 
 			 String str_clsx = "select 分类属性名称,分类属性值 from 材料属性表 where cl_id='"+cl_id+"' ";
-             SqlDataAdapter da_clsx = new SqlDataAdapter(str_clsx, conn);
-			 DataSet ds_clsx = new DataSet();
-             da_clsx.Fill(ds_clsx, "材料表");
-             dt_clsx = ds_clsx.Tables[0];
+             
+             dt_clsx = objConn.GetDataTable(str_clsx);
 			  
 			 this.Items2 = new List<OptionItem_sx>();
 			 for(int x= 0;x<dt_clsx.Rows.Count;x++)

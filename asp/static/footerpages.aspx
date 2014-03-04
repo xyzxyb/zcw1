@@ -9,21 +9,25 @@
 
 <script runat="server">
         protected DataTable dt = new DataTable();
-		
+		DataConn objConn=new DataConn();
+        public string SQL="";
         protected void Page_Load(object sender, EventArgs e)
         {
-            string constr = ConfigurationManager.ConnectionStrings["DNS"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-            conn.Open();         
-            string strr = "select count(wz_id),标题,发表时间 from 文章表 where 文档类型='材料发现' group by wz_id,标题,发表时间  ";
-            SqlCommand cmd = new SqlCommand(strr, conn);
-            SqlDataReader dr = cmd.ExecuteReader();
+            SQL="select count(wz_id),标题,发表时间 from 文章表 where 文档类型='材料发现' group by wz_id,标题,发表时间  ";
+           // string constr = ConfigurationManager.ConnectionStrings["DNS"].ConnectionString;
+          //  SqlConnection conn = new SqlConnection(constr);
+          //  conn.Open();         
+        //string strr = "select count(wz_id),标题,发表时间 from 文章表 where 文档类型='材料发现' group by wz_id,标题,发表时间  ";
+        //    SqlCommand cmd = new SqlCommand(strr, conn);
+          //  SqlDataReader dr = cmd.ExecuteReader();
+              SqlDataReader dr = null;
+             dr=objConn.sqlDataReader(SQL);
             while (dr.Read())
             {                
                 int str = (int)dr.GetInt32(0);
                 OutputBySize(str);
             }
-           conn.Close(); 
+           objConn.Close(); 
         }
 
                public string OutputBySize(int _intTotalPage)//分页函数

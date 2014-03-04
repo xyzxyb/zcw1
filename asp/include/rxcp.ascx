@@ -1,36 +1,4 @@
-﻿<!--
-	热销产品， 首页使用
-	文件名：rxcp.aspx
-	传入参数：无
--->
-
-<%@ Import Namespace="System.Data" %>
-<%@ Import Namespace="System.Data.SqlClient" %>
-<%@ Import Namespace="System" %>
-<%@ Import Namespace="System.Collections.Generic" %>
-<%@ Import Namespace="System.Web" %>
-
-<script runat="server">        
-	
-        protected DataTable dt_cltp = new DataTable();   //材料名字,存放地址(材料多媒体信息表)        
-        protected void Page_Load(object sender, EventArgs e)
-        {		      
-            string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-            conn.Open();
-            SqlDataAdapter da_cltp = new SqlDataAdapter("select 存放地址,材料名称,cl_id from 材料多媒体信息表 where  是否上头条='是' and 媒体类型 = '图片' and 大小='小' and cl_id in(select cl_id from 材料表 where 类型='主打')", conn);
-            DataSet ds_cltp = new DataSet();
-            da_cltp.Fill(ds_cltp, "材料多媒体信息表");            
-            dt_cltp = ds_cltp.Tables[0];     		
-			
-          
-		   
-        }		
-        
-</script>
-
-
-
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="rxcp.ascx.cs" Inherits="asp_include_rxcp" %>
 <div class="rxcp">
     <div class="rxcp1">
         <div class="rxcp2">

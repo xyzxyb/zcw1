@@ -40,16 +40,14 @@
             public string Value { get; set; }
           }
        	  public List<OptionItem> Items { get; set; }  //材料分页集合
+          DataConn objConn=new DataConn();
           protected void Page_Load(object sender, EventArgs e)
           {
 		     string key_ss = Request["sou"];  //获取搜索文本框中的值
-             string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-             SqlConnection conn = new SqlConnection(constr);
+            
 			 
-			 SqlDataAdapter da_clss_name = new SqlDataAdapter("select  显示名字,分类编码 from 材料分类表 " , conn);
-             DataSet ds_clss_name = new DataSet();
-             da_clss_name.Fill(ds_clss_name, "材料表");
-             dt_clss_name = ds_clss_name.Tables[0];
+			 dt_clss_name = objConn.GetDataTable("select  显示名字,分类编码 from 材料分类表 ");
+          
 			 foreach(System.Data.DataRow row in dt_clss_name.Rows)
 			 {
 			    //判断如果与材料分类表中的分类名称相匹配跳转到一级或二级页面
@@ -65,10 +63,8 @@
 				}
 			 }
 			 
-             SqlDataAdapter da_clss = new SqlDataAdapter("select top 10 显示名,规格型号,cl_id ,访问计数 from 材料表 where 显示名 like '%"+key_ss+"%'order by 访问计数 desc" , conn);
-             DataSet ds_clss = new DataSet();
-             da_clss.Fill(ds_clss, "材料表");
-             dt_clss = ds_clss.Tables[0];  
+             dt_clss= objConn.GetDataTable("select top 10 显示名,规格型号,cl_id ,访问计数 from 材料表 where 显示名 like '%"+key_ss+"%'order by 访问计数 desc");
+         
 
 
              //从查询字符串中获取"页号"参数
@@ -113,39 +109,31 @@
               //从数据库获取记录的总数量
               private int GetProductCount()
               {
-                    string connString = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
+                   
                     string key_ss = Request["sou"];  //获取搜索文本框中的值
                     string sql = "select count(cl_Id) from 材料表 where 显示名 like '%"+key_ss+"%'";
-                    SqlCommand cmd = new SqlCommand(sql);
-                    using (SqlConnection conn = new SqlConnection(connString))
-                    {
-                      cmd.Connection = conn;
-                      conn.Open();
-                      object obj = cmd.ExecuteScalar();
-                      conn.Close();
+                      object obj = objConn.DBLook(sql);
                       int count = (int)obj;
                       return count;
-                    }
               }
 
               private DataTable GetProductFormDB(int begin, int end, string key_ss)
               {
-                     string connString = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;         
-                     SqlCommand cmd = new SqlCommand("cl_ss_Paging");     //材料搜索分页存储过程
-                     cmd.CommandType = CommandType.StoredProcedure;
-                     cmd.Parameters.Add("@begin", SqlDbType.Int).Value = begin;            //开始页第一条记录
-                     cmd.Parameters.Add("@end", SqlDbType.Int).Value = end;                //开始页最后一条记录
-			         cmd.Parameters.Add("@显示名", SqlDbType.VarChar,20).Value = key_ss; //传材料编码给材料表,执行存储过程
-
-                     SqlDataAdapter sda = new SqlDataAdapter(cmd);        
-                     using (SqlConnection conn = new SqlConnection(connString))
+                                 SqlParameter[] coll=
                      {
-                          cmd.Connection = conn;
-                          conn.Open();
-                          sda.Fill(dt_cl_page);
-                          conn.Close();
-                     }
+                     new SqlParameter("@begin",begin),
+                     new SqlParameter("@end",end),
+                     new SqlParameter("@显示名",key_ss)
+                    
+                   //  cmd.Parameters.Add("@begin", SqlDbType.Int).Value = begin;            //开始页第一条记录
+                    // cmd.Parameters.Add("@end", SqlDbType.Int).Value = end;                //开始页最后一条记录
+			        // cmd.Parameters.Add("@显示名", SqlDbType.VarChar,20).Value = key_ss; //传材料编码给材料表,执行存储过程
+                    }
+                    dt_cl_page=objConn.ExecuteProcForTable("cl_ss_Paging",coll)
+                    // SqlDataAdapter sda = new SqlDataAdapter(cmd);        
+
                      return dt_cl_page;
+        
                }
 
                protected string cpPrev = "";
@@ -220,21 +208,16 @@
     <div class="dlspxt">
     <a href="clxx.aspx?cl_id=<%=row["cl_id"]%>">
      <%
-					string connString = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-                    SqlConnection con = new SqlConnection(connString);
-                    SqlCommand cmd = new SqlCommand("select  top 1 存放地址 from 材料多媒体信息表 where cl_id ='"
-                        +row["cl_id"]+"' and 大小='小'", con);
-
+				
                     String imgsrc= "images/222_03.jpg";
-                    using (con)
-                    {
-                         con.Open();
-                         Object result = cmd.ExecuteScalar();
+
+                         Object result = objConn.DBLook("select  top 1 存放地址 from 材料多媒体信息表 where cl_id ='"
+                        +row["cl_id"]+"' and 大小='小'");
                          if (result != null) 
 						 {
                              imgsrc = result.ToString();
                          }
-                    }
+                   
                     Response.Write("<img src="+imgsrc+ " width=150px height=150px />");
                 
 				

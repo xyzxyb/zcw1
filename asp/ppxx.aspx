@@ -44,40 +44,24 @@
 		protected DataTable dt_scsxx = new DataTable(); //供应商信息(材料供应商信息表)
 		protected DataTable dt_fxsxx = new DataTable(); //分销商信息(供应商和分销商相关表)
 		protected DataTable dt_clxx = new DataTable(); //该品牌下的产品(材料表)
+        DataConn objConn=new DataConn();
         protected void Page_Load(object sender, EventArgs e)
-        {
-            string constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-            conn.Open();          
+        {           
 			string pp_id = Request["pp_id"];  //获取传过来的pp_id
-            SqlDataAdapter da_ppxx = new SqlDataAdapter("select 品牌名称,scs_id  from 品牌字典 where pp_id='"+pp_id+"'", conn);
-            DataSet ds_ppxx = new DataSet();
-            da_ppxx.Fill(ds_ppxx, "品牌字典");            
-            dt_ppxx = ds_ppxx.Tables[0];				
-
+         dt_ppxx = objConn.GetDataTable("select 品牌名称,scs_id  from 品牌字典 where pp_id='"+pp_id+"'");
+          
              //访问计数加1
             String str_updatecounter = "update 品牌字典 set 访问计数 = (select 访问计数 from 品牌字典 where pp_id = '"+ pp_id +"')+1 where pp_id = '"+ pp_id +"'";
-            SqlCommand cmd_updatecounter = new SqlCommand(str_updatecounter, conn);         
-            cmd_updatecounter.ExecuteNonQuery();
-
+            objConn.ExecuteSQL(str_updatecounter,false);
 			
-            SqlDataAdapter da_scsxx = new SqlDataAdapter("select 供应商,联系人,联系人手机,联系地址,gys_id from 材料供应商信息表 where gys_id in (select scs_id from 品牌字典 where pp_id='"+pp_id+"' )", conn);
-            DataSet ds_scsxx = new DataSet();
-            da_scsxx.Fill(ds_scsxx, "材料供应商信息表");            
-            dt_scsxx = ds_scsxx.Tables[0];			
+            dt_scsxx =objConn.GetDataTable("select 供应商,联系人,联系人手机,联系地址,gys_id from 材料供应商信息表 where gys_id in (select scs_id from 品牌字典 where pp_id='"+pp_id+"' )");
+          
 			
             //获得该品牌的分销信息
 			//string BrandsName=Request["BrandsName"];
-            SqlDataAdapter da_fxsxx = new SqlDataAdapter("select 供应商,联系人,联系人手机,联系地址,gys_id from 材料供应商信息表 where gys_id in ( select fxs_id from 分销商和品牌对应关系表 where pp_id='"+pp_id+"')", conn);
-            DataSet ds_fxsxx = new DataSet();
-            da_fxsxx.Fill(ds_fxsxx, "材料供应商信息表");            
-            dt_fxsxx = ds_fxsxx.Tables[0];
-			
-			SqlDataAdapter da_clxx = new SqlDataAdapter("select 显示名 ,规格型号,cl_id from 材料表 where pp_id='"+pp_id+"'  ", conn);
-            DataSet ds_clxx  = new DataSet();
-            da_clxx .Fill(ds_clxx , "材料表 ");
-            conn.Close();             
-            dt_clxx = ds_clxx .Tables[0];
+           dt_fxsxx = objConn.GetDataTable("select 供应商,联系人,联系人手机,联系地址,gys_id from 材料供应商信息表 where gys_id in ( select fxs_id from 分销商和品牌对应关系表 where pp_id='"+pp_id+"')");
+           
+			dt_clxx =  objConn.GetDataTable("select 显示名 ,规格型号,cl_id from 材料表 where pp_id='"+pp_id+"'  ");         
         }	
        
     </script>
@@ -157,21 +141,15 @@
             <%foreach(System.Data.DataRow row in dt_clxx.Rows){%>
             <a href="clxx.aspx?cl_id=<%=row["cl_id"] %>">
             <div class="ppcp">
-                <%
-					string connString = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-                    SqlConnection con = new SqlConnection(connString);
-                    SqlCommand cmd = new SqlCommand("select  top 1 存放地址 from 材料多媒体信息表 where cl_id ='"
-                        +row["cl_id"]+"' and 大小='小'", con);
-
+                <%					
                     String imgsrc= "images/222_03.jpg";
-                    using (con)
-                    {
-                         con.Open();
-                         Object result = cmd.ExecuteScalar();
+                 
+                         Object result = objConn.DBLook("select  top 1 存放地址 from 材料多媒体信息表 where cl_id ='"
+                        +row["cl_id"]+"' and 大小='小'");
                          if (result != null) {
                              imgsrc = result.ToString();
                          }
-                    }
+                
                     Response.Write("<img src="+imgsrc+ " width=150px height=150px />");
                 
 				

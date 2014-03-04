@@ -7,17 +7,13 @@
 <%@ Import Namespace="System.Data.SqlClient" %>
 
 <%
-            String constr = ConfigurationManager.ConnectionStrings["zcw"].ConnectionString;
-            SqlConnection conn = new SqlConnection(constr);
-
+           DataConn conn1=new DataConn();
             string ejfl_id = Request["id"];   //获取小类穿过来的分类编码
             string id = ejfl_id.ToString().Substring(0, 2);
 			
 			
-            SqlDataAdapter da_pp = new SqlDataAdapter("select 品牌名称,pp_id from 品牌字典 where left(分类编码,2)='"+id+"'", conn);
-            DataSet ds_pp = new DataSet();
-            da_pp.Fill(ds_pp, "品牌字典");            
-            DataTable dt_pp = ds_pp.Tables[0];        
+            DataTable dt_pp = conn1.GetDataTable("select 品牌名称,pp_id from 品牌字典 where left(分类编码,2)='"+id+"'");
+          
             Response.Write("<option value='0'>选择品牌</option>");
             foreach(System.Data.DataRow row in dt_pp.Rows) 
             {
